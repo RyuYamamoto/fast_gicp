@@ -15,6 +15,7 @@ endif()
 
 set(CMAKE_BUILD_TYPE "Release")
 
+find_package(ament_cmake_auto REQUIRED)
 find_package(PCL REQUIRED)
 find_package(Eigen3 REQUIRED)
 
@@ -38,17 +39,17 @@ endif()
 ## catkin specific configuration ##
 ###################################
 if(catkin_FOUND)
-  catkin_package(
-    INCLUDE_DIRS include
-    LIBRARIES fast_gicp
-  )
+  #catkin_package(
+  #  INCLUDE_DIRS include
+  #  LIBRARIES fast_gicp
+  #)
 endif()
 
 ###########
 ## Build ##
 ###########
 
-add_library(fast_gicp SHARED
+ament_auto_add_library(fast_gicp SHARED
   src/fast_gicp/gicp/lsq_registration.cpp
   src/fast_gicp/gicp/fast_gicp.cpp
   src/fast_gicp/gicp/fast_gicp_st.cpp
@@ -72,12 +73,12 @@ if(BUILD_apps)
     fast_gicp
   )
 
-  add_executable(gicp_kitti src/kitti.cpp)
-  add_dependencies(gicp_kitti fast_gicp)
-  target_link_libraries(gicp_kitti
-    ${PCL_LIBRARIES}
-    fast_gicp
-  )
+  #add_executable(gicp_kitti src/kitti.cpp)
+  #add_dependencies(gicp_kitti fast_gicp)
+  #target_link_libraries(gicp_kitti
+  #  ${PCL_LIBRARIES}
+  #  fast_gicp
+  #)
 endif()
 
 ### Python bindings ###
@@ -144,8 +145,8 @@ endif()
 if(BUILD_test)
   find_package(GTest REQUIRED)
 
-  add_executable(gicp_test src/test/gicp_test.cpp)
-  add_dependencies(gicp_test fast_gicp)
+  #add_executable(gicp_test src/test/gicp_test.cpp)
+  #add_dependencies(gicp_test fast_gicp)
   target_link_libraries(gicp_test ${GTEST_LIBRARIES} ${PCL_LIBRARIES} fast_gicp)
   gtest_add_tests(TARGET gicp_test WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} EXTRA_ARGS "${CMAKE_SOURCE_DIR}/data")
 endif()
@@ -153,8 +154,27 @@ endif()
 if(catkin_FOUND)
   install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
-  
+
   install(DIRECTORY include/
     DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
     FILES_MATCHING PATTERN "*.hpp")
 endif()
+
+install(TARGETS 
+  gicp_align
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  TARGETS
+    gicp_align
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+)
+install(
+  DIRECTORY "include/"
+  DESTINATION include
+)
+
+ament_auto_package()
